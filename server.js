@@ -22,17 +22,18 @@ bot.on('message', function (msg) {
         case '/bash':
             request({uri:'http://bash.im/random', method:'GET', encoding: 'binary'},
                 function (err, res, page) {
-                    var $=cheerio.load(page);
+                    var $=cheerio.load(page),
+                        response = '';
 
                     $('.quote .text').each(function(){
                         $(this.children).each(function(){
-                            if(this.type == 'text') {
-                                var text = iconv.decode(this.data, 'win1251');
-                                bot.sendMessage(chatId, text);
-                            }
+                            console.log(this);
+                            if(this.type == 'text') response = response + iconv.decode(this.data, 'win1251');
+                            if(this.type == 'tag' && this.name == 'br') response = response + '\r\n';
                         });
                         return false;
                     });
+                    bot.sendMessage(chatId, response);
                 });
             break;
         
