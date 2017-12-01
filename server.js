@@ -1,28 +1,44 @@
-var TelegramBot = require('node-telegram-bot-api');
+var tgbot   = require('node-telegram-bot-api'),
+    http    = require('http'),
+    request = require('request'),
+    cheerio = require('cheerio'),
+    iconv   = require('iconv-lite'),
+    log     = require('./log'),
+    token = '483874841:AAHA0hwxXXfXfpglDEA2wXWILak5uV9aqbw',
+    bot = new tgbot(token, {polling: true});
 
-var token = '483874841:AAHA0hwxXXfXfpglDEA2wXWILak5uV9aqbw';
-var bot = new TelegramBot(token, {polling: true});
-
-bot.onText(/\/echo (.+)/, function (msg, match) {
-    var fromId = msg.from.id;
-    var resp = match[1];
-    bot.sendMessage(fromId, resp);
-});
-
+log.info('============== START ================');
 bot.onText(/\/bash (.+)/, function (msg, match) {
-    var fromId = msg.from.id;
-    var resp = match[1];
+    var fromId = msg.from.id,
+        resp = match[1];
+    
     bot.sendMessage(fromId, resp);
 });
 
 bot.on('message', function (msg) {
-    console.log(msg);
     var chatId = msg.chat.id;
-
-    if(msg.text == 'bash'){
-        bot.sendMessage(chatId, 'soon here been mem');
+    //console.log(msg);
+    if(msg.text == '/bash'){
+        log.info(msg.from.first_name);
+        request({
+                uri:'http://bash.im/random',
+                method:'GET',
+                encoding: 'binary'
+            },
+            function (err, res, page) {
+                var $=cheerio.load(page);
+                
+                $('.quote .text').each(function(){
+                    $(this.children).each(function(){
+                        if(this.type == 'text') {
+                            var text = iconv.decode(this.data, 'win1251');
+                            bot.sendMessage(chatId, text);
+                        }
+                     });              
+                    return false;
+                });
+            });        
     }else{
-        bot.sendMessage(chatId, 'Received your message');
+        bot.sendMessage(chatId, "I don't know this cmnd");
     }
-
-});
+}); 
