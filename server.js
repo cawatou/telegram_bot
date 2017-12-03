@@ -1,5 +1,4 @@
 var tgbot   = require('node-telegram-bot-api'),
-    http    = require('http'),
     request = require('request'),
     cheerio = require('cheerio'),
     iconv   = require('iconv-lite'),
@@ -9,10 +8,12 @@ var tgbot   = require('node-telegram-bot-api'),
     bot = new tgbot(token, {polling: true});
 
 log.info('============== START ================');
+
 bot.on('message', function (msg) {
-    var chatId = msg.chat.id;
+    var chatId = msg.chat.id,
+        fromId = msg.from.id;
     console.log(msg);
-    if(msg.text[0] == '/'){
+    if(!msg.photo && msg.text[0] == '/'){
         if(msg.from.username) log.info(msg.from.username + ' - ' + msg.text);
         else if(msg.from.first_name) log.info(msg.from.first_name + ' - ' + msg.text);
         else log.info(msg.from.id + ' - ' + msg.text);
@@ -42,12 +43,11 @@ bot.on('message', function (msg) {
             break;
         
         case '/rook':
-            bot.sendMessage(chatId, "Рокер, рикер, рикимару, райкин, рихтер, ростер, ркр, rkir и так далее");
+            bot.sendMessage(chatId, "Рокер, рикер, рикимару, райкин, рихтер, ростер, ркр, rkir, розенталь, ройзман, Рамзи, рамблер, рондо, ресторатор, ректор, рандом, рокфор, рокфеллер, раптор, румба, ридли и так далее");
             break;
         
         case '/skmnk':
-            const photo = 'img/skmnk.jpeg';
-            bot.sendPhoto(chatId, photo);
+            bot.sendPhoto(chatId, 'img/skmnk.jpeg');
             break;
         
         case '/quote':
@@ -72,42 +72,58 @@ bot.on('message', function (msg) {
                         bot.sendMessage(msg.chat.id, "Сначала открой приват с ботом");
                     });
             });
-           
                    
             break;
-        
-        case '/help':      
-            var command = [
-                '/bash - Случайный пост с сайта bash.im', 
-                '/lie - Вся правда о лае', 
-                '/rook - Кто такой рук?', 
-                '/skmnk - &геш', 
-                '/quote - Случайная цитата',
-                '/вовка и /саня - Тестеры',
-                '/quote - Случайная цитата',
-                '/quote_list - Список всех цитат (В личку)',
-                '/help - Список команд'
-            ],  
-                response = '';
-            for (var i=0; i<command.length; i++) {
-                response = response + command[i] + '\r\n';                
-            };
-            bot.sendMessage(chatId, response);
+
+        case '/fagot':
+            var date = (new Date()).toISOString().substring(0,10);
+            console.log(date);
+            fs.readFile('date.txt', 'utf8', function (err, data) {
+                console.log('data: ', data);
+                if(data == date){
+                    fs.readFile('fagot.txt', 'utf8', function (err, data) {
+                        bot.sendMessage(chatId, 'Пидор дня - ' + data);
+                    });
+                }else{
+                    var fagots = ['тоир', 'вовка', 'лай', 'рук', 'андрей', 'Alexander', 'кислый', 'хоб', 'лёха', 'vo va', 'custos', 'тоха'];
+                    var rand = Math.floor(Math.random() * fagots.length);
+                    fs.writeFile("date.txt", date);
+                    fs.writeFile("fagot.txt", fagots[rand]);
+                    bot.sendMessage(chatId, 'Пидор дня - ' + fagots[rand]);
+                }
+            });
             break;
-        
-        case '/test':      
-            var text = "forward_from: { id: 172849660, is_bot: false, first_name: 'vo', last_name: 'va' }, forward_date: 1511445784, text: 'Как-то мутно всё!' }";
-            bot.sendMessage(chatId, text);       
+
+        case '/tg':
+            fs.readFile('top_fagots.txt', 'utf8', function (err, data) {
+
+            });
             break;
 
         case '/вовка':
-            var text = "Тру тестер";
-            bot.sendMessage(chatId, text);
+            bot.sendMessage(chatId, "Тру тестер");
             break;
 
         case '/саня':
-            var text = "Ёба я тоже тестер нахуй";
-            bot.sendMessage(chatId, text);
+            bot.sendMessage(chatId, "Ёба я тоже тестер нахуй");
+            break;
+
+        case '/help':
+            var command = [
+                    '/bash - Случайный пост с сайта bash.im',
+                    '/lie - Вся правда о лае',
+                    '/rook - Кто такой рук?',
+                    '/skmnk - &геш',
+                    '/quote - Случайная цитата',
+                    '/quote_list - Список всех цитат (В личку)',
+                    '/fagot - пидр дня',
+                    '/help - Список команд',
+                    '/вовка и /саня - Тестеры'],
+                response = '';
+            for (var i=0; i<command.length; i++) {
+                response = response + command[i] + '\r\n';
+            };
+            bot.sendMessage(chatId, response);
             break;
     }
 }); 
