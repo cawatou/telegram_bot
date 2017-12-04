@@ -2,10 +2,10 @@ var mongo = require("mongodb").MongoClient,
     Promise = require("es6-promise"),
     url  = 'mongodb://localhost:27017/tgbot';
 
-var get = function get(col_name, limit, where){
+var get = function get(col_name, limit, where, mysort){
     return new Promise(function(resolve, reject) {
         mongo.connect(url, function(err, db){
-            db.collection(col_name).find(where).toArray(function(err, data){
+            db.collection(col_name).find(where).sort(mysort).toArray(function(err, data){
                 if(limit == 'one') resolve(data[0]);
                 if(limit == 'all') resolve(data);
                 db.close();

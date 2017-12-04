@@ -10,7 +10,6 @@ var tgbot   = require('node-telegram-bot-api'),
 
 //log.info('============== START ================');
 
-
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
         fromId = msg.from.id;
@@ -125,6 +124,18 @@ bot.on('message', function (msg) {
             
             break;
 
+        case '/fagot_top':
+            db.get('users', 'all', {}, {'fagot_count': -1})
+                .then(function(users){
+                    var top = '';
+                    for (var i = 0; i < users.length; i++) {                        
+                        top = top + users[i].name + ' - ' + users[i].fagot_count + '\r\n';
+                    }
+                    bot.sendMessage(chatId, top);
+                })
+           
+            break; 
+        
         case '/test':
             bot.sendMessage(chatId, "test");
             break;
@@ -146,6 +157,7 @@ bot.on('message', function (msg) {
                     '/quote - Случайная цитата',
                     '/quote_list - Список всех цитат (В личку)',
                     '/fagot - пидр дня',
+                    '/fagot_top - топ пидров',
                     '/help - Список команд',
                     '/вовка и /саня - Тестеры'],
                 response = '';
