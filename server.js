@@ -6,7 +6,8 @@ var tgbot   = require('node-telegram-bot-api'),
     fs      = require('fs'),
     db      = require('./db'),
     log     = require('./log'),
-    token = '483874841:AAHA0hwxXXfXfpglDEA2wXWILak5uV9aqbw',
+    config  = require('./config'),
+    token   = config.tg_token,
     bot = new tgbot(token, {polling: true});
 
 //log.info('============== START ================');

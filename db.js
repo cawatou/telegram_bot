@@ -1,6 +1,7 @@
-var mongo = require("mongodb").MongoClient,
+var mongo   = require("mongodb").MongoClient,
     Promise = require("es6-promise"),
-    url  = 'mongodb://localhost:27017/tgbot';
+    config  = require('./config'),
+    url  = config.db_url;
 
 var get = function get(col_name, limit, where, mysort){
     return new Promise(function(resolve, reject) {
