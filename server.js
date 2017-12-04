@@ -2,6 +2,7 @@ var tgbot   = require('node-telegram-bot-api'),
     request = require('request'),
     cheerio = require('cheerio'),
     iconv   = require('iconv-lite'),
+    moment  = require('moment'),
     fs      = require('fs'),
     db      = require('./db'),
     log     = require('./log'),
@@ -76,7 +77,7 @@ bot.on('message', function (msg) {
             break;
 
         case '/fagot':
-            var date = (new Date()).toISOString().substring(0,10);
+            var date = moment(date).format("YYYY-MM-DD");
             db.get('date', 'one')
                 .then(function (data){
                     if(data.value == date){                        
