@@ -3,11 +3,13 @@ var tgbot   = require('node-telegram-bot-api'),
     cheerio = require('cheerio'),
     iconv   = require('iconv-lite'),
     fs      = require('fs'),
+    db      = require('./db'),
     log     = require('./log'),
     token = '483874841:AAHA0hwxXXfXfpglDEA2wXWILak5uV9aqbw',
     bot = new tgbot(token, {polling: true});
 
-log.info('============== START ================');
+//log.info('============== START ================');
+
 
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
@@ -71,33 +73,60 @@ bot.on('message', function (msg) {
                     .catch(function (err) {
                         bot.sendMessage(msg.chat.id, "Сначала открой приват с ботом");
                     });
-            });
-                   
+            });                   
             break;
 
         case '/fagot':
             var date = (new Date()).toISOString().substring(0,10);
-            console.log(date);
-            fs.readFile('date.txt', 'utf8', function (err, data) {
-                console.log('data: ', data);
-                if(data == date){
-                    fs.readFile('fagot.txt', 'utf8', function (err, data) {
-                        bot.sendMessage(chatId, 'Пидор дня - ' + data);
-                    });
-                }else{
-                    var fagots = ['тоир', 'вовка', 'лай', 'рук', 'андрей', 'Alexander', 'кислый', 'хоб', 'лёха', 'vo va', 'custos', 'тоха'];
-                    var rand = Math.floor(Math.random() * fagots.length);
-                    fs.writeFile("date.txt", date);
-                    fs.writeFile("fagot.txt", fagots[rand]);
-                    bot.sendMessage(chatId, 'Пидор дня - ' + fagots[rand]);
-                }
-            });
+            db.get('date', 'one')
+                .then(function (data){
+                    if(data.value == date){                        
+                         db.get('fagot', 'one')
+                            .then(function (fagot){
+                                bot.sendMessage(chatId, 'Пидор дня - ' + fagot.name);
+                            })
+                            .catch(function (err) {
+                                logger.info('getFagot error:', err);
+                            });
+                    }else{
+                        db.get('users', 'all')
+                            .then(function (users){
+                                var fagots = [],
+                                    rand = Math.floor(Math.random() * users.length);
+                                
+                                for (var i = 0; i < users.length; i++) {
+                                    fagots.push(users[i]['name']);
+                                }
+
+                                db.update('date', {'value': date}, {'value': data.value});
+                                db.get('fagot', 'one')
+                                    .then(function (old_fagot){
+                                        db.update('fagot', {'name': fagots[rand]}, {'name': old_fagot.name});
+                                        return db.get('users', 'one', {"name": fagots[rand]})
+                                    }) 
+                                    .then(function (user){                                        
+                                        user.fagot_count++;
+                                        db.update('users', user, {'name': user.name});                                            
+                                        bot.sendMessage(chatId, 'Пидор дня - ' + fagots[rand]);                                                                              
+                                    })
+                                    .catch(function (err) {
+                                        logger.info('setFagot error:', err);
+                                    });
+                                
+                            })
+                            .catch(function (err) {
+                                logger.info('getUserName error:', err);
+                            })
+                    }
+                })
+                .catch(function (err) {
+                    logger.info('get error:', err);
+                });
+            
             break;
 
-        case '/tg':
-            fs.readFile('top_fagots.txt', 'utf8', function (err, data) {
-
-            });
+        case '/test':
+            bot.sendMessage(chatId, "test");
             break;
 
         case '/вовка':
