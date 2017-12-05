@@ -24,6 +24,13 @@ const port = process.env.PORT || 8080;
 console.log(url);
 //log.info('============== START ================');
 
+
+
+
+
+
+
+
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
         fromId = msg.from.id;
@@ -179,8 +186,25 @@ bot.on('message', function (msg) {
 
             break;
 
-        case '/tt':
+        case '/use':
+            var counter = [],
+                response = '';
+            fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
+                var arr = data.split('\n');
+                for(var i=0; i < arr.length; i++){
+                    var row = arr[i].split('- ');
+                    var name = row[1];
 
+                    if(name == undefined || name == '============== START ================') continue;
+                    if(counter[name]) counter[name]++;
+                    else counter[name] = 1;
+                }
+                for (key in counter) {
+                    response = response + key + '- ' + counter[key] + '\n\r';
+                };
+
+                bot.sendMessage(chatId, response);
+            });
             break;
 
         case '/вовка':
@@ -202,6 +226,7 @@ bot.on('message', function (msg) {
                     '/fagot - пидр дня',
                     '/fagot_top - топ пидров',
                     '/gif - Случайная гифка',
+                    '/use - топ пользователей скрипта',
                     '/help - Список команд',
                     '/вовка и /саня - Тестеры'],
                 response = '';
@@ -215,10 +240,7 @@ bot.on('message', function (msg) {
 
 
 /*======================== GAME ========================*/
-// Tunnel to localhost.
-// This is just for demo purposes.
-// In your application, you will be using a static URL, probably that
-// you paid for. :)
+// tunnel to localhost.
 if (url === '0') {
     console.log('Tunnel to localhost');
     const ngrok = require('ngrok');
