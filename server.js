@@ -25,7 +25,29 @@ console.log(url);
 //log.info('============== START ================');
 
 
+/*
 
+var counter = new Array(),
+    response = '',
+    sort_array = new Array();
+fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
+    var arr = data.split('\n');
+    for(var i=0; i < arr.length; i++){
+        var row = arr[i].split('- ');
+        var name = row[1];
+
+        if(name == undefined || name == '============== START ================') continue;
+        if(counter[name]) counter[name]++;
+        else counter[name] = 1;
+    }
+
+    for (key in counter) {
+        sort_array.push({})
+    }
+    counter.sort();
+    console.log(counter);
+});
+*/
 
 
 
@@ -199,6 +221,7 @@ bot.on('message', function (msg) {
                     if(counter[name]) counter[name]++;
                     else counter[name] = 1;
                 }
+                counter.sort(compareNumeric);
                 for (key in counter) {
                     response = response + key + '- ' + counter[key] + '\n\r';
                 };
@@ -273,3 +296,9 @@ app.listen(port, function listen() {
     console.log('Bind server to port');
     console.log(`Server is listening at http://localhost:${port}`);
 });
+
+
+function compareNumeric(a, b) {
+    if (a > b) return 1;
+    if (a < b) return -1;
+}
