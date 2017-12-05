@@ -1,4 +1,5 @@
 var tgbot   = require('node-telegram-bot-api'),
+    rp      = require('request-promise'),
     request = require('request'),
     cheerio = require('cheerio'),
     iconv   = require('iconv-lite'),
@@ -138,8 +139,51 @@ bot.on('message', function (msg) {
            
             break; 
         
-        case '/test':
-            bot.sendMessage(chatId, "test");
+        case '/gif':
+            var options = {
+                    uri: 'http://forgifs.com/gallery/main.php?g2_view=dynamicalbum.RandomAlbum',
+                    transform: function (body) {
+                        return cheerio.load(body);
+                    }
+                },
+                url = '',
+                response = '';
+
+            rp(options)
+                .then(function ($) {
+                    $('#gsThumbMatrix .giItemCell').each(function(){
+                        url = 'http://forgifs.com/gallery/' + $(this).find('a').attr('href');
+                        return false;
+                    });
+                    request({uri: url, method: 'GET', encoding: 'binary'},
+                        function (err, res, page) {
+                            $=cheerio.load(page);
+                            console.log('tt');
+                            response = 'http://forgifs.com/gallery/' + $('#gsImageView img').attr('src');
+                            bot.sendMessage(chatId, response);
+                        });
+                })
+                .catch(function (err) {
+                    logger.info('get error /gif:', err);
+                });
+            
+           /* request({uri:'http://forgifs.com/gallery/main.php?g2_view=dynamicalbum.RandomAlbum', method:'GET', encoding: 'binary'},
+                function (err, res, page) {
+                    var $=cheerio.load(page);
+                    $('#gsThumbMatrix .giItemCell').each(function(){
+                        return url = 'http://forgifs.com/gallery/' + $(this).find('a').attr('href');                    
+                    });
+                    console.log(url);
+                    //bot.sendMessage(chatId, response);
+                });
+            console.log('external:');*/
+            /*request({uri: url, method: 'GET', encoding: 'binary'},
+                function (err, res, page) {
+                    $=cheerio.load(page);
+                    console.log('tt');
+                    response = 'http://forgifs.com/gallery/' + $('#gsImageView img').attr('src');
+                });*/
+            
             break;
 
         case '/вовка':
@@ -160,6 +204,7 @@ bot.on('message', function (msg) {
                     '/quote_list - Список всех цитат (В личку)',
                     '/fagot - пидр дня',
                     '/fagot_top - топ пидров',
+                    '/gif - Случайная гифка',
                     '/help - Список команд',
                     '/вовка и /саня - Тестеры'],
                 response = '';
