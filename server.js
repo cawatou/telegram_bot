@@ -8,9 +8,20 @@ var tgbot   = require('node-telegram-bot-api'),
     db      = require('./db'),
     log     = require('./log'),
     config  = require('./config'),
+    express = require('express'),
+    path    = require('path'),
     token   = config.tg_token,
-    bot = new tgbot(token, {polling: true});
+    bot = new tgbot(token, {polling: true}),
+    app = express();
 
+const gameName = process.env.TELEGRAM_GAMENAME || 'game30sm';
+
+app.set('view engine', 'ejs');
+
+var   url  = process.env.URL || 'http://95.183.10.70:8080';
+//var   url  = '0';
+const port = process.env.PORT || 8080;
+console.log(url);
 //log.info('============== START ================');
 
 bot.on('message', function (msg) {
@@ -18,9 +29,9 @@ bot.on('message', function (msg) {
         fromId = msg.from.id;
     console.log(msg);
     if(!msg.photo && msg.text[0] == '/'){
-        if(msg.from.username) log.info(msg.from.username + ' - ' + msg.text);
-        else if(msg.from.first_name) log.info(msg.from.first_name + ' - ' + msg.text);
-        else log.info(msg.from.id + ' - ' + msg.text);
+        if(msg.from.username) log.info(msg.from.username + ' - ' + msg.text + ' ('+ msg.chat.type +')' );
+        else if(msg.from.first_name) log.info(msg.from.first_name + ' - ' + msg.text + ' ('+ msg.chat.type +')' );
+        else log.info(msg.from.id + ' - ' + msg.text + ' ('+ msg.chat.type +')' );
     }    
 
     switch (msg.text) {
@@ -47,7 +58,7 @@ bot.on('message', function (msg) {
             break;
         
         case '/rook':
-            bot.sendMessage(chatId, "Рокер, рикер, рикимару, райкин, рихтер, ростер, ркр, rkir, розенталь, ройзман, Рамзи, рамблер, рондо, ресторатор, ректор, рандом, рокфор, рокфеллер, раптор, румба, ридли и так далее");
+            bot.sendMessage(chatId, "Рокер, рикер, рикимару, райкин, рихтер, ростер, ркр, rkir, розенталь, ройзман, Рамзи, рамблер, рондо, ресторатор, ректор, рандом, рокфор, рокфеллер, раптор, румба, ридли, ридонли, ротонда, Роллингстоунс, Ребекка и так далее");
             break;
         
         case '/skmnk':
@@ -158,32 +169,18 @@ bot.on('message', function (msg) {
                     request({uri: url, method: 'GET', encoding: 'binary'},
                         function (err, res, page) {
                             $=cheerio.load(page);
-                            console.log('tt');
                             response = 'http://forgifs.com/gallery/' + $('#gsImageView img').attr('src');
-                            bot.sendMessage(chatId, response);
+                            bot.sendDocument(chatId, response);
                         });
                 })
                 .catch(function (err) {
                     logger.info('get error /gif:', err);
                 });
-            
-           /* request({uri:'http://forgifs.com/gallery/main.php?g2_view=dynamicalbum.RandomAlbum', method:'GET', encoding: 'binary'},
-                function (err, res, page) {
-                    var $=cheerio.load(page);
-                    $('#gsThumbMatrix .giItemCell').each(function(){
-                        return url = 'http://forgifs.com/gallery/' + $(this).find('a').attr('href');                    
-                    });
-                    console.log(url);
-                    //bot.sendMessage(chatId, response);
-                });
-            console.log('external:');*/
-            /*request({uri: url, method: 'GET', encoding: 'binary'},
-                function (err, res, page) {
-                    $=cheerio.load(page);
-                    console.log('tt');
-                    response = 'http://forgifs.com/gallery/' + $('#gsImageView img').attr('src');
-                });*/
-            
+
+            break;
+
+        case '/tt':
+
             break;
 
         case '/вовка':
@@ -214,4 +211,43 @@ bot.on('message', function (msg) {
             bot.sendMessage(chatId, response);
             break;
     }
-}); 
+});
+
+
+/*======================== GAME ========================*/
+// Tunnel to localhost.
+// This is just for demo purposes.
+// In your application, you will be using a static URL, probably that
+// you paid for. :)
+if (url === '0') {
+    console.log('Tunnel to localhost');
+    const ngrok = require('ngrok');
+    ngrok.connect(port, function onConnect(error, u) {
+        if (error) throw error;
+        url = u;
+        console.log(`Game tunneled at ${url}`);
+    });
+}
+
+// Matches /start
+bot.onText(/\/game/, function onPhotoText(msg) {
+    console.log('start');
+    bot.sendGame(msg.chat.id, gameName);
+});
+
+// Handle callback queries
+bot.on('callback_query', function onCallbackQuery(callbackQuery) {
+    bot.answerCallbackQuery(callbackQuery.id, { url });
+});
+
+// Render the HTML game
+app.get('/', function requestListener(req, res) {
+    console.log('Render the HTML game', res);
+    res.sendFile(path.join(__dirname, 'game/game.html'));
+});
+
+// Bind server to port
+app.listen(port, function listen() {
+    console.log('Bind server to port');
+    console.log(`Server is listening at http://localhost:${port}`);
+});
