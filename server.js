@@ -45,15 +45,6 @@ fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
     console.log(counter);
 });*/
 
-db.get("quotes", "one", {"text": "Долбоебы.!"})
-    .then(function(res){
-        if(res) {
-            console.log("Такая цитата уже есть");
-        }else{
-            console.log("insert db");
-        }
-    })
-
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
         fromId = msg.from.id;
@@ -272,13 +263,29 @@ bot.onText(/\/addquot/, function(msg) {
     db.get("quotes", "one", {"text": quote})
         .then(function(res){
             if(res) {
-                console.log("Такая цитата уже есть");
+                bot.sendMessage(chatId, "Такая цитата уже есть");
             }else{
-                console.log("insert db");
                 db.insert("quotes", {"text": quote});
+                bot.sendMessage(chatId, "Цитата добавлена");
             }
         })
-    console.log(quote);
+});
+
+
+// remove from db
+bot.onText(/\/delquot/, function(msg) {
+    var chatId = msg.chat.id,
+        quote = msg.text.substring(9);
+
+    db.get("quotes", "one", {"text": quote})
+        .then(function(res){
+            if(res) {
+                db.del("quotes", res);
+                bot.sendMessage(chatId, "Цитата удалена");
+            }else{
+                bot.sendMessage(chatId, "Цитата не найдена");
+            }
+        })
 });
 
 

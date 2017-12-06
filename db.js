@@ -53,6 +53,23 @@ var insert = function insert(col_name, data){
     });
 }
 
+var del = function del(col_name, data){
+    return new Promise(function(resolve, reject) {
+        mongo.connect(url, function(err, db){
+            db.collection(col_name).deleteOne(data, function(err, res) {
+                if (err) throw err;
+                else resolve('delete');
+                db.close();
+            });
+            if(err){
+                logger.info('bd error:', err);
+                reject(err);
+            }
+        });
+    });
+}
+
 module.exports.get = get;
 module.exports.update = update;
 module.exports.insert = insert;
+module.exports.del = del;
