@@ -26,9 +26,9 @@ console.log(url);
 
 
 
-/*var counter = new Array(),
+var counter = new Array(),
     response = '',
-    sort_array = new Array();
+    sortable = new Array();
 fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
     var arr = data.split('\n');
     for(var i=0; i < arr.length; i++){
@@ -40,12 +40,22 @@ fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
         else counter[name] = 1;
     }
 
-    for (key in counter) {
-        sort_array.push({})
+    for (var user in counter) {
+        sortable.push([user, counter[user]]);
     }
-    counter.sort();
-    console.log(counter);
-});*/
+
+    sortable.sort(function(a, b) {
+        return b[1] - a[1];
+    });
+
+    for (var i=0; i < sortable.length; i++) {
+        response = response + sortable[i][0] + '- ' + sortable[i][1] + '\n\r';
+    };
+
+    console.log(response);
+});
+
+
 
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
@@ -206,6 +216,7 @@ bot.on('message', function (msg) {
 
         case '/use':
             var counter = [],
+                sortable = [],
                 response = '';
             fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
                 var arr = data.split('\n');
@@ -217,9 +228,17 @@ bot.on('message', function (msg) {
                     if(counter[name]) counter[name]++;
                     else counter[name] = 1;
                 }
-                counter.sort(compareNumeric);
-                for (key in counter) {
-                    response = response + key + '- ' + counter[key] + '\n\r';
+
+                for (var user in counter) {
+                    sortable.push([user, counter[user]]);
+                }
+
+                sortable.sort(function(a, b) {
+                    return b[1] - a[1];
+                });
+
+                for (var i=0; i < sortable.length; i++) {
+                    response = response + sortable[i][0] + '- ' + sortable[i][1] + '\n\r';
                 };
 
                 bot.sendMessage(chatId, response);
