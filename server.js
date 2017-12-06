@@ -24,39 +24,6 @@ const port = process.env.PORT || 8080;
 console.log(url);
 //log.info('============== START ================');
 
-
-
-var counter = new Array(),
-    response = '',
-    sortable = new Array();
-fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
-    var arr = data.split('\n');
-    for(var i=0; i < arr.length; i++){
-        var row = arr[i].split('- ');
-        var name = row[1];
-
-        if(name == undefined || name == '============== START ================') continue;
-        if(counter[name]) counter[name]++;
-        else counter[name] = 1;
-    }
-
-    for (var user in counter) {
-        sortable.push([user, counter[user]]);
-    }
-
-    sortable.sort(function(a, b) {
-        return b[1] - a[1];
-    });
-
-    for (var i=0; i < sortable.length; i++) {
-        response = response + sortable[i][0] + '- ' + sortable[i][1] + '\n\r';
-    };
-
-    console.log(response);
-});
-
-
-
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
         fromId = msg.from.id;
@@ -91,9 +58,20 @@ bot.on('message', function (msg) {
             break;
         
         case '/rook':
-            bot.sendMessage(chatId, "Рокер, рикер, рикимару, райкин, рихтер, ростер, ркр, rkir, розенталь, ройзман, Рамзи, рамблер, рондо, ресторатор, ректор, рандом, рокфор, рокфеллер, раптор, румба, ридли, ридонли, ротонда, Роллингстоунс, Ребекка, Ростислав и так далее");
+            var response = '';
+            db.get("rook", "all")
+                .then(function(res) {
+                    for (var i=0; i < res.length; i++) {
+                        if(i == res.length - 1) response = response + res[i].value;
+                        else response = response + res[i].value + ', ';
+                    };
+                    bot.sendMessage(chatId, response + " и так далее");
+                })
+                .catch(function(err){
+                    console.log(err);
+                })
             break;
-        
+
         case '/skmnk':
             bot.sendPhoto(chatId, 'img/skmnk.jpeg');
             break;
@@ -255,9 +233,8 @@ bot.on('message', function (msg) {
 
         case '/help':
             var response = '';
-            db.get("help_menu", "all")
+            db.get("help_menu", "all", {}, {sort: 1})
                 .then(function(res){
-                    console.log(res);
                     for (var i=0; i<res.length; i++) {
                         response = response + res[i].value + '\r\n';
                     };
@@ -268,9 +245,9 @@ bot.on('message', function (msg) {
 });
 
 // add in db
-bot.onText(/\/addquot/, function(msg) {
+bot.onText(/\/addquote/, function(msg) {
     var chatId = msg.chat.id,
-        quote = msg.text.substring(9);
+        quote = msg.text.substring(10);
 
     db.get("quotes", "one", {"text": quote})
         .then(function(res){
@@ -283,11 +260,26 @@ bot.onText(/\/addquot/, function(msg) {
         })
 });
 
+bot.onText(/\/addrook/, function(msg) {
+    var chatId = msg.chat.id,
+        rook = msg.text.substring(9);
+
+    db.get("rook", "one", {"value": rook})
+        .then(function(res){
+            if(res) {
+                bot.sendMessage(chatId, "Такой Рукер уже есть");
+            }else{
+                db.insert("rook", {"value": rook});
+                bot.sendMessage(chatId, "Рукер добавлен");
+            }
+        })
+});
+
 
 // remove from db
-bot.onText(/\/delquot/, function(msg) {
+bot.onText(/\/delquote/, function(msg) {
     var chatId = msg.chat.id,
-        quote = msg.text.substring(9);
+        quote = msg.text.substring(10);
 
     db.get("quotes", "one", {"text": quote})
         .then(function(res){
@@ -296,6 +288,21 @@ bot.onText(/\/delquot/, function(msg) {
                 bot.sendMessage(chatId, "Цитата удалена");
             }else{
                 bot.sendMessage(chatId, "Цитата не найдена");
+            }
+        })
+});
+
+bot.onText(/\/delrook/, function(msg) {
+    var chatId = msg.chat.id,
+        rook = msg.text.substring(9);
+
+    db.get("rook", "one", {"value": rook})
+        .then(function(res){
+            if(res) {
+                db.del("rook", res);
+                bot.sendMessage(chatId, "Рукер удален =)");
+            }else{
+                bot.sendMessage(chatId, "Такой Рукер не найден");
             }
         })
 });
