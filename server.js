@@ -25,8 +25,6 @@ console.log(url);
 //log.info('============== START ================');
 
 
-/*
-
 var counter = new Array(),
     response = '',
     sort_array = new Array();
@@ -47,10 +45,6 @@ fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
     counter.sort();
     console.log(counter);
 });
-*/
-
-
-
 
 
 bot.on('message', function (msg) {
@@ -87,7 +81,7 @@ bot.on('message', function (msg) {
             break;
         
         case '/rook':
-            bot.sendMessage(chatId, "Рокер, рикер, рикимару, райкин, рихтер, ростер, ркр, rkir, розенталь, ройзман, Рамзи, рамблер, рондо, ресторатор, ректор, рандом, рокфор, рокфеллер, раптор, румба, ридли, ридонли, ротонда, Роллингстоунс, Ребекка и так далее");
+            bot.sendMessage(chatId, "Рокер, рикер, рикимару, райкин, рихтер, ростер, ркр, rkir, розенталь, ройзман, Рамзи, рамблер, рондо, ресторатор, ректор, рандом, рокфор, рокфеллер, раптор, румба, ридли, ридонли, ротонда, Роллингстоунс, Ребекка, Ростислав и так далее");
             break;
         
         case '/skmnk':
