@@ -24,6 +24,8 @@ const port = process.env.PORT || 8080;
 console.log(url);
 //log.info('============== START ================');
 
+
+
 /*var counter = new Array(),
     response = '',
     sort_array = new Array();
@@ -233,24 +235,15 @@ bot.on('message', function (msg) {
             break;
 
         case '/help':
-            var command = [
-                    '/bash - Случайный пост с сайта bash.im',
-                    '/lie - Вся правда о лае',
-                    '/rook - Кто такой рук?',
-                    '/skmnk - &геш',
-                    '/quote - Случайная цитата',
-                    '/quote_list - Список всех цитат (В личку)',
-                    '/fagot - пидр дня',
-                    '/fagot_top - топ пидров',
-                    '/gif - Случайная гифка',
-                    '/use - топ пользователей скрипта',
-                    '/help - Список команд',
-                    '/вовка и /саня - Тестеры'],
-                response = '';
-            for (var i=0; i<command.length; i++) {
-                response = response + command[i] + '\r\n';
-            };
-            bot.sendMessage(chatId, response);
+            var response = '';
+            db.get("help_menu", "all")
+                .then(function(res){
+                    console.log(res);
+                    for (var i=0; i<res.length; i++) {
+                        response = response + res[i].value + '\r\n';
+                    };
+                    bot.sendMessage(chatId, response);
+                })
             break;
     }
 });
