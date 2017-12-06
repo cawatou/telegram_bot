@@ -24,8 +24,7 @@ const port = process.env.PORT || 8080;
 console.log(url);
 //log.info('============== START ================');
 
-
-var counter = new Array(),
+/*var counter = new Array(),
     response = '',
     sort_array = new Array();
 fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
@@ -44,7 +43,9 @@ fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
     }
     counter.sort();
     console.log(counter);
-});
+});*/
+
+
 
 
 bot.on('message', function (msg) {
@@ -89,27 +90,29 @@ bot.on('message', function (msg) {
             break;
         
         case '/quote':
-            fs.readFile('quotes/quotes.txt', 'utf8', function (err, data) {
-                var arr = data.split(';');
-                var rand = Math.floor(Math.random() * arr.length);                
-                bot.sendMessage(chatId, arr[rand]);
-            });           
+            db.get("quotes", "all")
+                .then(function(res){
+                    var rand = Math.floor(Math.random() * res.length);
+                    bot.sendMessage(chatId, res[rand].text);
+                });
+
             break;
         
-        case '/quote_list':            
-            fs.readFile('quotes/quotes.txt', 'utf8', function (err, data) {
-                var arr = data.split(';'),
-                    fromId = msg.from.id,
-                    response = '';
-                for (var i=0; i<arr.length; i++) {
-                    response = response + arr[i] + '\r\n';
-                };
+        case '/quote_list':
+            db.get("quotes", "all")
+                .then(function(res){
+                    var fromId = msg.from.id,
+                        response = '';
 
-                bot.sendMessage(fromId, response) 
-                    .catch(function (err) {
-                        bot.sendMessage(msg.chat.id, "Сначала открой приват с ботом");
-                    });
-            });                   
+                    for (var i=0; i<res.length; i++) {
+                        response = response + res[i].text + '\r\n';
+                    };
+
+                    bot.sendMessage(fromId, response)
+                        .catch(function (err) {
+                            bot.sendMessage(msg.chat.id, "Сначала открой приват с ботом");
+                        });
+                });
             break;
 
         case '/fagot':
