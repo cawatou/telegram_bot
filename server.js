@@ -45,8 +45,14 @@ fs.readFile('logs/cheese.log', 'utf8', function (err, data) {
     console.log(counter);
 });*/
 
-
-
+db.get("quotes", "one", {"text": "Долбоебы.!"})
+    .then(function(res){
+        if(res) {
+            console.log("Такая цитата уже есть");
+        }else{
+            console.log("insert db");
+        }
+    })
 
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
@@ -256,6 +262,23 @@ bot.on('message', function (msg) {
             bot.sendMessage(chatId, response);
             break;
     }
+});
+
+// add in db
+bot.onText(/\/addquot/, function(msg) {
+    var chatId = msg.chat.id,
+        quote = msg.text.substring(9);
+
+    db.get("quotes", "one", {"text": quote})
+        .then(function(res){
+            if(res) {
+                console.log("Такая цитата уже есть");
+            }else{
+                console.log("insert db");
+                db.insert("quotes", {"text": quote});
+            }
+        })
+    console.log(quote);
 });
 
 
