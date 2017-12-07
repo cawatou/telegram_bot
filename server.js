@@ -24,6 +24,9 @@ const port = process.env.PORT || 8080;
 console.log(url);
 //log.info('============== START ================');
 
+
+
+
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
         fromId = msg.from.id;
@@ -32,9 +35,10 @@ bot.on('message', function (msg) {
         if(msg.from.username) log.info(msg.from.username + ' - ' + msg.text + ' ('+ msg.chat.type +')' );
         else if(msg.from.first_name) log.info(msg.from.first_name + ' - ' + msg.text + ' ('+ msg.chat.type +')' );
         else log.info(msg.from.id + ' - ' + msg.text + ' ('+ msg.chat.type +')' );
-    }    
+    }
 
-    switch (msg.text) {
+    var command = msg.text.replace( "@script30sm_bot", "" );
+    switch (command) {
         case '/bash':
             request({uri:'http://bash.im/random', method:'GET', encoding: 'binary'},
                 function (err, res, page) {
@@ -246,8 +250,10 @@ bot.on('message', function (msg) {
 
 // add in db
 bot.onText(/\/addquote/, function(msg) {
-    var chatId = msg.chat.id,
-        quote = msg.text.substring(10);
+    var command = msg.text.replace( "@script30sm_bot", "" ),
+        chatId = msg.chat.id,
+        quote = command.substring(10);
+
 
     db.get("quotes", "one", {"text": quote})
         .then(function(res){
@@ -261,8 +267,9 @@ bot.onText(/\/addquote/, function(msg) {
 });
 
 bot.onText(/\/addrook/, function(msg) {
-    var chatId = msg.chat.id,
-        rook = msg.text.substring(9);
+    var command = msg.text.replace( "@script30sm_bot", "" ),
+        chatId = msg.chat.id,
+        rook = command.substring(9);
 
     db.get("rook", "one", {"value": rook})
         .then(function(res){
@@ -278,8 +285,9 @@ bot.onText(/\/addrook/, function(msg) {
 
 // remove from db
 bot.onText(/\/delquote/, function(msg) {
-    var chatId = msg.chat.id,
-        quote = msg.text.substring(10);
+    var command = msg.text.replace( "@script30sm_bot", "" ),
+        chatId = msg.chat.id,
+        quote = command.substring(10);
 
     db.get("quotes", "one", {"text": quote})
         .then(function(res){
@@ -293,8 +301,9 @@ bot.onText(/\/delquote/, function(msg) {
 });
 
 bot.onText(/\/delrook/, function(msg) {
-    var chatId = msg.chat.id,
-        rook = msg.text.substring(9);
+    var command = msg.text.replace( "@script30sm_bot", "" ),
+        chatId = msg.chat.id,
+        rook = command.substring(9);
 
     db.get("rook", "one", {"value": rook})
         .then(function(res){
