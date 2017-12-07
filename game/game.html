@@ -15,16 +15,23 @@
             border: 1px solid #d3d3d3;
             background-color: #f1f1f1;
         }
+
+        button {
+            width: 490px !important;
+        }
+
+        #share {
+            display: none;
+        }
     </style>
 </head>
 <body onload="startGame()">
 <div class="row">
     <div class="col-md-12 col-xs-12">
-        <p>
-            <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)" ontouchstart="accelerate(-0.2)" ontouchend="accelerate(0.05)" class="btn btn-default btn-lg">УСКОРЕНИЕ</button>
-            <!--<button >УСКОРЕНИЕ</button>-->
+        <p style="text-align: center">
+            <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)" ontouchstart="accelerate(-0.2)" ontouchend="accelerate(0.05)" class="btn btn-default btn-lg btn-block">УСКОРЕНИЕ</button>
+            <button id="share" onclick="TelegramGameProxy.shareScore()">Поделиться</button>
         </p>
-        <p>Используйте кнопку УСКОРЕНИЕ для управления</p>
     </div>
 </div>
 <script>
@@ -42,7 +49,7 @@
         canvas: document.createElement("canvas"),
         start: function () {
             this.canvas.width = 480;
-            this.canvas.height = 270;
+            this.canvas.height = 480;
             this.context = this.canvas.getContext("2d");
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
             this.frameNo = 0;
@@ -118,6 +125,7 @@
         var x, height, gap, minHeight, maxHeight, minGap, maxGap;
         for (i = 0; i < myObstacles.length; i += 1) {
             if (myGamePiece.crashWith(myObstacles[i])) {
+                document.getElementById("share").style.display = 'block';
                 return;
             }
         }
@@ -138,7 +146,7 @@
             myObstacles[i].x += -1;
             myObstacles[i].update();
         }
-        myScore.text = "ОЧКИ: " + myGameArea.frameNo;
+        myScore.text = "ОЧКИ: " + Math.floor(myGameArea.frameNo/100);
         myScore.update();
         myGamePiece.newPos();
         myGamePiece.update();
@@ -153,5 +161,6 @@
         myGamePiece.gravity = n;
     }
 </script>
+<script src="https://telegram.org/js/games.js"></script>
 </body>
 </html>

@@ -337,18 +337,23 @@ if (url === '0') {
 // Matches /start
 bot.onText(/\/game/, function onPhotoText(msg) {
     console.log('start');
+    //bot.getGameHighScores(msg.from.id);
     bot.sendGame(msg.chat.id, gameName);
 });
 
 // Handle callback queries
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
-    console.log("url: ", url);
+    /*if(callbackQuery.id) {
+        if (callbackQuery.from.username) log.info(callbackQuery.from.username + ' - start game (' + callbackQuery.message.chat.type + ')');
+        else if (callbackQuery.from.first_name) log.info(callbackQuery.from.first_name + ' - start game (' + callbackQuery.message.chat.type + ')');
+        else log.info(callbackQuery.from.id + ' - start game (' + callbackQuery.message.chat.type + ')');
+    }*/
     bot.answerCallbackQuery(callbackQuery.id, url, true, { url });
 });
 
 // Render the HTML game
 app.get('/', function requestListener(req, res) {
-    console.log('Render the HTML game', res);
+    console.log('Render the HTML game');
     res.sendFile(path.join(__dirname, 'game/game.html'));
 });
 
@@ -358,8 +363,3 @@ app.listen(port, function listen() {
     console.log(`Server is listening at http://localhost:${port}`);
 });
 
-
-function compareNumeric(a, b) {
-    if (a > b) return 1;
-    if (a < b) return -1;
-}
