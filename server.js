@@ -21,11 +21,7 @@ app.set('view engine', 'ejs');
 var   url  = process.env.URL || 'http://95.183.10.70:8080';
 //var   url  = '0';
 const port = process.env.PORT || 8080;
-console.log(url);
 //log.info('============== START ================');
-
-
-
 
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
@@ -220,7 +216,8 @@ bot.on('message', function (msg) {
                 });
 
                 for (var i=0; i < sortable.length; i++) {
-                    response = response + sortable[i][0] + '- ' + sortable[i][1] + '\n\r';
+                    if(i == 14) break;
+                    response = response + (i + 1) + ') ' +sortable[i][0] + '- ' + sortable[i][1] + '\n\r';
                 };
 
                 bot.sendMessage(chatId, response);
@@ -254,32 +251,40 @@ bot.onText(/\/addquote/, function(msg) {
         chatId = msg.chat.id,
         quote = command.substring(10);
 
-
-    db.get("quotes", "one", {"text": quote})
-        .then(function(res){
-            if(res) {
-                bot.sendMessage(chatId, "Такая цитата уже есть");
-            }else{
-                db.insert("quotes", {"text": quote});
-                bot.sendMessage(chatId, "Цитата добавлена");
-            }
-        })
+    if(quote != "") {
+        db.get("quotes", "one", {"text": quote})
+            .then(function (res) {
+                if (res) {
+                    bot.sendMessage(chatId, "Такая цитата уже есть");
+                } else {
+                    db.insert("quotes", {"text": quote});
+                    bot.sendMessage(chatId, "Цитата добавлена");
+                }
+            })
+    }else{
+        bot.sendMessage(chatId, "Нельзя добавить пустую цитату");
+    }
 });
 
 bot.onText(/\/addrook/, function(msg) {
     var command = msg.text.replace( "@script30sm_bot", "" ),
         chatId = msg.chat.id,
         rook = command.substring(9);
-
-    db.get("rook", "one", {"value": rook})
-        .then(function(res){
-            if(res) {
-                bot.sendMessage(chatId, "Такой Рукер уже есть");
-            }else{
-                db.insert("rook", {"value": rook});
-                bot.sendMessage(chatId, "Рукер добавлен");
-            }
-        })
+    
+    if(rook != ""){
+        db.get("rook", "one", {"value": rook})
+            .then(function(res){
+                if(res) {
+                    bot.sendMessage(chatId, "Такой Рукер уже есть");
+                }else{
+                    db.insert("rook", {"value": rook});
+                    bot.sendMessage(chatId, "Рукер добавлен");
+                }
+            })
+    }else{
+        bot.sendMessage(chatId, "Пустым Рукер быть не может");
+    } 
+   
 });
 
 
@@ -337,7 +342,8 @@ bot.onText(/\/game/, function onPhotoText(msg) {
 
 // Handle callback queries
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
-    bot.answerCallbackQuery(callbackQuery.id, { url });
+    console.log("url: ", url);
+    bot.answerCallbackQuery(callbackQuery.id, url, true, { url });
 });
 
 // Render the HTML game
