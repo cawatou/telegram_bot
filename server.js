@@ -29,13 +29,10 @@ const port = process.env.PORT || 8080;
 //log.info('============== START ================');
 
 
-
 /*bot.getChatAdministrators("-1001205417187")
     .then(res=>{
         console.log(res);
     })*/
-
-
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
         fromId = msg.from.id;
@@ -251,17 +248,19 @@ bot.on('message', function (msg) {
                     for(var i=0; i < data.length; i++){
                         users.push([data[i].id, data[i].name]);
                     }
-                    return db.get("game_score", "all", {}, {total_score: -1})
+                    return db.get("game_score", "all", {}, {best_score: -1})
                 })
                 .then(function(score){                    
                     for(var i=0; i < score.length; i++){
                         for(var j=0; j < users.length; j++){
-                            console.log(users[j][0], score[i].uid);
                             if(parseInt(users[j][0]) == parseInt(score[i].uid)) {
                                 user_name = users[j][1];
                             }
+                            if(score[i].uid == "246570799") user_name = "limpass84";
+                            if(score[i].uid == "333653686") user_name = "zelenkina";
+                            //if(score[i].uid == "246570799") user_name = "limpass84";
                         }
-                        response = response + (i + 1) + ") " + user_name + " - " + score[i].total_score + '\r\n';
+                        response = response + (i + 1) + ") " + user_name + " - " + score[i].best_score + " ( " + score[i].game_count + ' игр, ' + score[i].total_score + ' - сум ) \r\n';
                     }
                     bot.sendMessage(chatId, response);
                 })
@@ -279,16 +278,22 @@ bot.on('message', function (msg) {
                     return db.get("game_score", "one", {}, {best_score: -1})
                 })
                 .then(function(score){
-                    console.log('score: ', score, users);
                     for(var j=0; j < users.length; j++){
                         if(parseInt(users[j][0]) == parseInt(score.uid)) {
                             user_name = users[j][1];
-                            console.log(user_name);
+                            //console.log(user_name);
                         }
                     }
                     response = "Лучший счет за игру: " + score.best_score + " [ " + user_name + " ]";
                     bot.sendMessage(chatId, response)
                 })
+            break;
+
+        case '/game_url':
+            bot.sendMessage(fromId, 'http://95.183.10.70:8080?userid=' + fromId)
+                .catch(function (err) {
+                    bot.sendMessage(msg.chat.id, "Сначала открой приват с ботом");
+                });
             break;
         
         case '/вовка':
@@ -303,7 +308,7 @@ bot.on('message', function (msg) {
             var response = '';            
             db.get("help_menu", "all", {}, {sort: 1})
                 .then(function(res){
-                    for (var i=0; i<res.length; i++) {
+                    for (var i=0; i<res.length; i++) {                        
                         response = response + res[i].value + '\r\n';
                     };
                     bot.sendMessage(chatId, response);
@@ -401,8 +406,6 @@ if (url === '0') {
     });
 }
 
-
-
 // Handle callback queries
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     if(callbackQuery.id) {
@@ -440,7 +443,15 @@ app.post('/score', function requestListener(req, res) {
             }
         })
 
-    console.log('score: ', score, userId);
+
+    db.get("users", "one", {"id": parseInt(userId)})
+        .then(function(user){
+            var date = moment(date).format("YYYY-MM-DD H:m:s"),
+                data = {"date": date, "uid": userId, "name": user.name, "score": score};
+            db.insert('score_log', data);
+            console.log('score: ', score, user.name);
+        })
+    
 });
 
 // Bind server to port

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=0.5"/>
     <script src="https://telegram.org/js/games.js"></script>
     <script href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
     <link rel=stylesheet href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
@@ -22,11 +22,10 @@
         }
     </style>
 </head>
-<body onload="startGame()">
+<body onload="startGame()" onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)" ontouchstart="accelerate(-0.2)" ontouchend="accelerate(0.05)">
 <div class="row">
     <div class="col-md-12 col-xs-12">
-        <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)" ontouchstart="accelerate(-0.2)" ontouchend="accelerate(0.05)" class="btn btn-default btn-lg btn-block">УСКОРЕНИЕ</button>
-        <button id="refresh" onclick="location.reload()">Еще раз!</button>
+      <button id="refresh" onclick="location.reload()">Еще раз!</button>
     </div>
 </div>
 <script>
