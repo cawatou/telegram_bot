@@ -28,6 +28,14 @@ var   url  = process.env.URL || 'http://95.183.10.70:8080';
 const port = process.env.PORT || 8080;
 //log.info('============== START ================');
 
+
+
+/*bot.getChatAdministrators("-1001205417187")
+    .then(res=>{
+        console.log(res);
+    })*/
+
+
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
         fromId = msg.from.id;
@@ -229,6 +237,60 @@ bot.on('message', function (msg) {
             });
             break;
 
+
+        case '/game': 
+            bot.sendGame(msg.chat.id, gameName);
+            break
+        
+        case '/game_top':
+            var users = [],
+                response = '',
+                user_name = '';
+            db.get("users", "all")
+                .then(function(data){
+                    for(var i=0; i < data.length; i++){
+                        users.push([data[i].id, data[i].name]);
+                    }
+                    return db.get("game_score", "all", {}, {total_score: -1})
+                })
+                .then(function(score){                    
+                    for(var i=0; i < score.length; i++){
+                        for(var j=0; j < users.length; j++){
+                            console.log(users[j][0], score[i].uid);
+                            if(parseInt(users[j][0]) == parseInt(score[i].uid)) {
+                                user_name = users[j][1];
+                            }
+                        }
+                        response = response + (i + 1) + ") " + user_name + " - " + score[i].total_score + '\r\n';
+                    }
+                    bot.sendMessage(chatId, response);
+                })
+            break;
+
+        case '/game_record':
+            var users = [],
+                response = '',
+                user_name ='';
+            db.get("users", "all")
+                .then(function(data){
+                    for(var i=0; i < data.length; i++){
+                        users.push([data[i].id, data[i].name]);
+                    }
+                    return db.get("game_score", "one", {}, {best_score: -1})
+                })
+                .then(function(score){
+                    console.log('score: ', score, users);
+                    for(var j=0; j < users.length; j++){
+                        if(parseInt(users[j][0]) == parseInt(score.uid)) {
+                            user_name = users[j][1];
+                            console.log(user_name);
+                        }
+                    }
+                    response = "Лучший счет за игру: " + score.best_score + " [ " + user_name + " ]";
+                    bot.sendMessage(chatId, response)
+                })
+            break;
+        
         case '/вовка':
             bot.sendMessage(chatId, "Тру тестер");
             break;
@@ -238,7 +300,7 @@ bot.on('message', function (msg) {
             break;
 
         case '/help':
-            var response = '';
+            var response = '';            
             db.get("help_menu", "all", {}, {sort: 1})
                 .then(function(res){
                     for (var i=0; i<res.length; i++) {
@@ -339,23 +401,17 @@ if (url === '0') {
     });
 }
 
-// Matches /start
-bot.onText(/\/game/, function onPhotoText(msg) {
-    console.log('start');
-    //
-    bot.sendGame(msg.chat.id, gameName);
-});
+
 
 // Handle callback queries
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
-    /*if(callbackQuery.id) {
-        if (callbackQuery.from.username) log.info(callbackQuery.from.username + ' - start game (' + callbackQuery.message.chat.type + ')');
-        else if (callbackQuery.from.first_name) log.info(callbackQuery.from.first_name + ' - start game (' + callbackQuery.message.chat.type + ')');
-        else log.info(callbackQuery.from.id + ' - start game (' + callbackQuery.message.chat.type + ')');
-    }*/
+    if(callbackQuery.id) {
+        if (callbackQuery.from.username) log.info(callbackQuery.from.username + ' - start game ');
+        else if (callbackQuery.from.first_name) log.info(callbackQuery.from.first_name + ' - start game');
+        else log.info(callbackQuery.from.id + ' - start game');
+    }
     url = "http://95.183.10.70:8080";
     url = url + "/?userid=" + callbackQuery.from.id;
-    console.log(url);
     bot.answerCallbackQuery(callbackQuery.id, url, true, { url });
 });
 
@@ -379,7 +435,7 @@ app.post('/score', function requestListener(req, res) {
                 data.total_score = parseInt(data.total_score) + parseInt(score);
                 db.update('game_score', data, {'uid': userId});
             }else{
-                var data = {"uid":userId, "game_count": 1, "best_score": score, "total_score": score};
+                var data = {"uid":userId, "game_count": 1, "best_score": parseInt(score), "total_score": parseInt(score)};
                 db.insert('game_score', data);
             }
         })

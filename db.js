@@ -24,7 +24,7 @@ var get = function get(col_name, limit, where, mysort){
 var update = function update(col_name, new_value, old_value){
     return new Promise(function(resolve, reject) {
         mongo.connect(url, function(err, db){
-            db.collection(col_name).updateOne(old_value, new_value, function(err, res) {
+            db.collection(col_name).updateOne(old_value, new_value, function(err, res){
                 if (err) throw err;
                 else resolve('update');
                 db.close();
