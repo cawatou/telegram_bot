@@ -1,4 +1,5 @@
 var tgbot   = require('node-telegram-bot-api'),
+    bParser = require('body-parser'),
     rp      = require('request-promise'),
     request = require('request'),
     cheerio = require('cheerio'),
@@ -17,6 +18,10 @@ var tgbot   = require('node-telegram-bot-api'),
 const gameName = process.env.TELEGRAM_GAMENAME || 'game30sm';
 
 app.set('view engine', 'ejs');
+app.use(bParser.json() );
+app.use(bParser.urlencoded({
+    extended: true
+}));
 
 var   url  = process.env.URL || 'http://95.183.10.70:8080';
 //var   url  = '0';
@@ -337,7 +342,7 @@ if (url === '0') {
 // Matches /start
 bot.onText(/\/game/, function onPhotoText(msg) {
     console.log('start');
-    //bot.getGameHighScores(msg.from.id);
+    //
     bot.sendGame(msg.chat.id, gameName);
 });
 
@@ -348,6 +353,9 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
         else if (callbackQuery.from.first_name) log.info(callbackQuery.from.first_name + ' - start game (' + callbackQuery.message.chat.type + ')');
         else log.info(callbackQuery.from.id + ' - start game (' + callbackQuery.message.chat.type + ')');
     }*/
+    url = "http://95.183.10.70:8080";
+    url = url + "/?userid=" + callbackQuery.from.id;
+    console.log(url);
     bot.answerCallbackQuery(callbackQuery.id, url, true, { url });
 });
 
@@ -355,6 +363,28 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
 app.get('/', function requestListener(req, res) {
     console.log('Render the HTML game');
     res.sendFile(path.join(__dirname, 'game/game.html'));
+});
+
+
+app.post('/score', function requestListener(req, res) {
+    var userId = req.body.userid,
+        score = req.body.score,
+        data;
+
+    db.get('game_score', 'one', {"uid": userId})
+        .then(function(data){
+            if(data){
+                data.game_count++;
+                if(parseInt(data.best_score) < parseInt(score)) data.best_score = score;
+                data.total_score = parseInt(data.total_score) + parseInt(score);
+                db.update('game_score', data, {'uid': userId});
+            }else{
+                var data = {"uid":userId, "game_count": 1, "best_score": score, "total_score": score};
+                db.insert('game_score', data);
+            }
+        })
+
+    console.log('score: ', score, userId);
 });
 
 // Bind server to port

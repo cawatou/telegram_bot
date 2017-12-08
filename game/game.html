@@ -1,26 +1,23 @@
-<!-- Game example taken from w3schools (https://www.w3schools.com/graphics/game_intro.asp) -->
 <!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://telegram.org/js/games.js"></script>
     <script href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
     <link rel=stylesheet href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
     <style>
-        body {
-            font-family: 'Courier ';
-            text-align: center;
-        }
-
         canvas {
             border: 1px solid #d3d3d3;
             background-color: #f1f1f1;
         }
-
         button {
             width: 490px !important;
+            height: 70px;
+            border-radius: 10px !important;
+            border: none;
+            margin-bottom: 20px;
         }
-
-        #share {
+        #refresh {
             display: none;
         }
     </style>
@@ -28,14 +25,11 @@
 <body onload="startGame()">
 <div class="row">
     <div class="col-md-12 col-xs-12">
-        <p style="text-align: center">
-            <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)" ontouchstart="accelerate(-0.2)" ontouchend="accelerate(0.05)" class="btn btn-default btn-lg btn-block">УСКОРЕНИЕ</button>
-            <button id="share" onclick="TelegramGameProxy.shareScore()">Поделиться</button>
-        </p>
+        <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)" ontouchstart="accelerate(-0.2)" ontouchend="accelerate(0.05)" class="btn btn-default btn-lg btn-block">УСКОРЕНИЕ</button>
+        <button id="refresh" onclick="location.reload()">Еще раз!</button>
     </div>
 </div>
 <script>
-    console.log('fads');
     var myGamePiece;
     var myObstacles = [];
     var myScore;
@@ -125,8 +119,19 @@
         var x, height, gap, minHeight, maxHeight, minGap, maxGap;
         for (i = 0; i < myObstacles.length; i += 1) {
             if (myGamePiece.crashWith(myObstacles[i])) {
-                document.getElementById("share").style.display = 'block';
-                return;
+                if(myScore.score > 0){
+                    var req, userId,
+                        url = document.URL;
+
+                    userId = getParameterByName('userid', url);
+                    req = new XMLHttpRequest();
+                    req.open('POST', 'http://95.183.10.70:8080/score', true);
+                    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    req.send('userid=' + userId + '&score=' + myScore.score);
+                    myScore.score = 0;
+                    document.getElementById("refresh").style.display = 'block';
+                }
+                return myScore.score;
             }
         }
         myGameArea.clear();
@@ -146,7 +151,8 @@
             myObstacles[i].x += -1;
             myObstacles[i].update();
         }
-        myScore.text = "ОЧКИ: " + Math.floor(myGameArea.frameNo/100);
+        myScore.score = Math.floor(myGameArea.frameNo/100);
+        myScore.text = "ОЧКИ: " + myScore.score;
         myScore.update();
         myGamePiece.newPos();
         myGamePiece.update();
@@ -160,7 +166,17 @@
     function accelerate(n) {
         myGamePiece.gravity = n;
     }
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
 </script>
-<script src="https://telegram.org/js/games.js"></script>
+
 </body>
 </html>
