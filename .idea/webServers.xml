@@ -2,8 +2,8 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="f8925738-c124-49dd-a8df-4fa8278015b6" name="my-vps (project level)" url="http://95.183.10.70">
-        <fileTransfer host="95.183.10.70" port="22" rootFolder="/var/www" accessType="SFTP" username="root" password="dfcedff1dfc0dfc6dfd3dfccdfc2dfccdfdadfe6dfeedfecdf99">
+      <webServer id="f8925738-c124-49dd-a8df-4fa8278015b6" name="my-vps" url="http://95.183.10.70">
+        <fileTransfer host="95.183.10.70" port="22" rootFolder="/var/www" accessType="SFTP" password="dfcedff1dfc0dfc6dfd3dfccdfc2dfccdfdadfe6dfeedfecdf99" username="root">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" />
           </advancedOptions>

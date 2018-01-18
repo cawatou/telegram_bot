@@ -43,7 +43,8 @@ bot.on('message', function (msg) {
         else log.info(msg.from.id + ' - ' + msg.text + ' ('+ msg.chat.type +')' );
     }
 
-    var command = msg.text.replace( "@script30sm_bot", "" );
+    //var command = msg.text.replace( "@script30sm_bot", "" );
+    var command = msg.text;
     switch (command) {
         case '/bash':
             request({uri:'http://bash.im/random', method:'GET', encoding: 'binary'},

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="PublishConfigData">
     <serverData>
-      <paths name="my-vps (project level)">
+      <paths name="my-vps">
         <serverdata>
           <mappings>
             <mapping deploy="/script30sm_bot" local="$PROJECT_DIR$" web="/" />
