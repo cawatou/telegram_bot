@@ -12,8 +12,9 @@ var tgbot   = require('node-telegram-bot-api'),
     express = require('express'),
     path    = require('path'),
     token   = config.tg_token,
-    bot = new tgbot(token, {polling: true}),
-    app = express();
+    bot     = new tgbot(token, {polling: true}),
+    app     = express(),
+    cron    = require('node-cron');
 
 const gameName = process.env.TELEGRAM_GAMENAME || 'game30sm';
 
@@ -114,52 +115,7 @@ bot.on('message', function (msg) {
             break;
 
         case '/fagot':
-            var date = moment(date).format("YYYY-MM-DD");
-            db.get('date', 'one')
-                .then(function (data){
-                    if(data.value == date){                        
-                         db.get('fagot', 'one')
-                            .then(function (fagot){
-                                bot.sendMessage(chatId, 'Пидор дня - ' + fagot.name);
-                            })
-                            .catch(function (err) {
-                                logger.info('getFagot error:', err);
-                            });
-                    }else{
-                        db.get('users', 'all')
-                            .then(function (users){
-                                var fagots = [],
-                                    rand = Math.floor(Math.random() * users.length);
-                                
-                                for (var i = 0; i < users.length; i++) {
-                                    fagots.push(users[i]['name']);
-                                }
-
-                                db.update('date', {'value': date}, {'value': data.value});
-                                db.get('fagot', 'one')
-                                    .then(function (old_fagot){
-                                        db.update('fagot', {'name': fagots[rand]}, {'name': old_fagot.name});
-                                        return db.get('users', 'one', {"name": fagots[rand]})
-                                    }) 
-                                    .then(function (user){                                        
-                                        user.fagot_count++;
-                                        db.update('users', user, {'name': user.name});                                            
-                                        bot.sendMessage(chatId, 'Пидор дня - ' + fagots[rand]);                                                                              
-                                    })
-                                    .catch(function (err) {
-                                        logger.info('setFagot error:', err);
-                                    });
-                                
-                            })
-                            .catch(function (err) {
-                                logger.info('getUserName error:', err);
-                            })
-                    }
-                })
-                .catch(function (err) {
-                    logger.info('get error:', err);
-                });
-            
+            fagot_function(chatId);
             break;
 
         case '/fagot_top':
@@ -458,6 +414,54 @@ app.post('/score', function requestListener(req, res) {
 // Bind server to port
 app.listen(port, function listen() {
     console.log('Bind server to port');
-    console.log(`Server is listening at http://localhost:${port}`);
+    console.log(`Server is listening at http://localhrost:${port}`);
 });
 
+function fagot_function(chatId){
+    console.log('fdasf');
+    var date = moment(date).format("YYYY-MM-DD");
+    db.get('date', 'one')
+        .then(function (data){
+            if(data.value == date){
+                db.get('fagot', 'one')
+                    .then(function (fagot){
+                        bot.sendMessage(chatId, 'Пидор дня - ' + fagot.name);
+                    })
+                    .catch(function (err) {
+                        logger.info('getFagot error:', err);
+                    });
+            }else{
+                db.get('users', 'all')
+                    .then(function (users){
+                        var fagots = [],
+                            rand = Math.floor(Math.random() * users.length);
+
+                        for (var i = 0; i < users.length; i++) {
+                            fagots.push(users[i]['name']);
+                        }
+
+                        db.update('date', {'value': date}, {'value': data.value});
+                        db.get('fagot', 'one')
+                            .then(function (old_fagot){
+                                db.update('fagot', {'name': fagots[rand]}, {'name': old_fagot.name});
+                                return db.get('users', 'one', {"name": fagots[rand]})
+                            })
+                            .then(function (user){
+                                user.fagot_count++;
+                                db.update('users', user, {'name': user.name});
+                                bot.sendMessage(chatId, 'Пидор дня - ' + fagots[rand]);
+                            })
+                            .catch(function (err) {
+                                logger.info('setFagot error:', err);
+                            });
+
+                    })
+                    .catch(function (err) {
+                        logger.info('getUserName error:', err);
+                    })
+            }
+        })
+        .catch(function (err) {
+            logger.info('get error:', err);
+        });
+}
