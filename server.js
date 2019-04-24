@@ -37,7 +37,7 @@ const port = process.env.PORT || 8080;
 bot.on('message', function (msg) {
     var chatId = msg.chat.id,
         fromId = msg.from.id;
-    console.log(msg);
+
     if(!msg.photo && msg.text[0] == '/'){
         if(msg.from.username) log.info(msg.from.username + ' - ' + msg.text + ' ('+ msg.chat.type +')' );
         else if(msg.from.first_name) log.info(msg.from.first_name + ' - ' + msg.text + ' ('+ msg.chat.type +')' );
@@ -46,6 +46,7 @@ bot.on('message', function (msg) {
 
     //var command = msg.text.replace( "@script30sm_bot", "" );
     var command = msg.text;
+
     switch (command) {
         case '/bash':
             request({uri:'http://bash.im/random', method:'GET', encoding: 'binary'},
@@ -55,7 +56,6 @@ bot.on('message', function (msg) {
 
                     $('.quote .text').each(function(){
                         $(this.children).each(function(){
-                            console.log(this);
                             if(this.type == 'text') response = response + iconv.decode(this.data, 'win1251');
                             if(this.type == 'tag' && this.name == 'br') response = response + '\r\n';
                         });
@@ -64,11 +64,11 @@ bot.on('message', function (msg) {
                     bot.sendMessage(chatId, response);
                 });
             break;
-        
+
         case '/lie':
             bot.sendMessage(chatId, "лай, чмо и педораз");
             break;
-        
+
         case '/rook':
             var response = '';
             db.get("rook", "all")
@@ -87,7 +87,7 @@ bot.on('message', function (msg) {
         case '/skmnk':
             bot.sendPhoto(chatId, 'img/skmnk.jpeg');
             break;
-        
+
         case '/quote':
             db.get("quotes", "all")
                 .then(function(res){
@@ -96,7 +96,7 @@ bot.on('message', function (msg) {
                 });
 
             break;
-        
+
         case '/quote_list':
             db.get("quotes", "all")
                 .then(function(res){
@@ -122,14 +122,14 @@ bot.on('message', function (msg) {
             db.get('users', 'all', {}, {'fagot_count': -1})
                 .then(function(users){
                     var top = '';
-                    for (var i = 0; i < users.length; i++) {                        
+                    for (var i = 0; i < users.length; i++) {
                         top = top + users[i].name + ' - ' + users[i].fagot_count + '\r\n';
                     }
                     bot.sendMessage(chatId, top);
                 })
-           
-            break; 
-        
+
+            break;
+
         case '/gif':
             var options = {
                     uri: 'http://forgifs.com/gallery/main.php?g2_view=dynamicalbum.RandomAlbum',
@@ -192,10 +192,10 @@ bot.on('message', function (msg) {
             break;
 
 
-        case '/game': 
+        case '/game':
             bot.sendGame(msg.chat.id, gameName);
             break
-        
+
         case '/game_top':
             var users = [],
                 response = '',
@@ -207,7 +207,7 @@ bot.on('message', function (msg) {
                     }
                     return db.get("game_score", "all", {}, {best_score: -1})
                 })
-                .then(function(score){                    
+                .then(function(score){
                     for(var i=0; i < score.length; i++){
                         for(var j=0; j < users.length; j++){
                             if(parseInt(users[j][0]) == parseInt(score[i].uid)) {
@@ -252,7 +252,7 @@ bot.on('message', function (msg) {
                     bot.sendMessage(msg.chat.id, "Сначала открой приват с ботом");
                 });
             break;
-        
+
         case '/вовка':
             bot.sendMessage(chatId, "Тру тестер");
             break;
@@ -262,10 +262,21 @@ bot.on('message', function (msg) {
             break;
 
         case '/help':
-            var response = '';            
+            var response = '';
             db.get("help_menu", "all", {}, {sort: 1})
                 .then(function(res){
-                    for (var i=0; i<res.length; i++) {                        
+                    for (var i=0; i<res.length; i++) {
+                        response = response + res[i].value + '\r\n';
+                    };
+                    bot.sendMessage(chatId, response);
+                })
+            break;
+
+        case '/':
+            var response = '';
+            db.get("help_menu", "all", {}, {sort: 1})
+                .then(function(res){
+                    for (var i=0; i<res.length; i++) {
                         response = response + res[i].value + '\r\n';
                     };
                     bot.sendMessage(chatId, response);
@@ -299,7 +310,7 @@ bot.onText(/\/addrook/, function(msg) {
     var command = msg.text.replace( "@script30sm_bot", "" ),
         chatId = msg.chat.id,
         rook = command.substring(9);
-    
+
     if(rook != ""){
         db.get("rook", "one", {"value": rook})
             .then(function(res){
@@ -312,8 +323,8 @@ bot.onText(/\/addrook/, function(msg) {
             })
     }else{
         bot.sendMessage(chatId, "Пустым Рукер быть не может");
-    } 
-   
+    }
+
 });
 
 
@@ -354,7 +365,6 @@ bot.onText(/\/delrook/, function(msg) {
 /*======================== GAME ========================*/
 // tunnel to localhost.
 if (url === '0') {
-    console.log('Tunnel to localhost');
     const ngrok = require('ngrok');
     ngrok.connect(port, function onConnect(error, u) {
         if (error) throw error;
@@ -377,7 +387,6 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
 
 // Render the HTML game
 app.get('/', function requestListener(req, res) {
-    console.log('Render the HTML game');
     res.sendFile(path.join(__dirname, 'game/game.html'));
 });
 
@@ -406,9 +415,8 @@ app.post('/score', function requestListener(req, res) {
             var date = moment(date).format("YYYY-MM-DD H:m:s"),
                 data = {"date": date, "uid": userId, "name": user.name, "score": score};
             db.insert('score_log', data);
-            console.log('score: ', score, user.name);
         })
-    
+
 });
 
 // Bind server to port
@@ -418,7 +426,6 @@ app.listen(port, function listen() {
 });
 
 function fagot_function(chatId){
-    console.log('fdasf');
     var date = moment(date).format("YYYY-MM-DD");
     db.get('date', 'one')
         .then(function (data){
